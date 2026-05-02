@@ -36,6 +36,8 @@ Variaveis:
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
 
+Para deploy na Vercel, configure as mesmas variaveis no painel do projeto (Production/Preview/Development), principalmente `MONGODB_URI`.
+
 ## Scripts
 
 - `npm run start`: inicia o servidor de forma estatica
@@ -55,3 +57,9 @@ Com a API em execucao, acesse:
 - `http://localhost:3000/api-docs`
 
 A especificacao OpenAPI esta em `src/docs/swagger.json`.
+
+## Deploy na Vercel
+
+- O entrypoint serverless e `api/index.js`.
+- Cada invocacao garante conexao valida com MongoDB antes de executar as rotas.
+- A conexao Mongoose e reaproveitada entre invocacoes quentes para reduzir latencia.
