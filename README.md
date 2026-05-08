@@ -63,5 +63,3 @@ A especificacao OpenAPI esta em `src/docs/swagger.json`.
 - O entrypoint serverless e `api/index.js`.
 - Cada invocacao garante conexao valida com MongoDB antes de executar as rotas.
 - A conexao Mongoose e reaproveitada entre invocacoes quentes para reduzir latencia.
-
-TESTE MARYANA 
