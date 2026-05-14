@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+       mongo:
+        image: mongo:6.0
+        ports:
+        - 27017:27017
+        options: --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure environment variables
+        run: |
+          echo "MONGODB_URI=mongodb://127.0.0.1:27017/controle-zootecnico" >> $GITHUB_ENV
+          echo "BASE_URL=http://localhost:3000" >> $GITHUB_ENV
+          echo "JWT_SECRET=ci-secret" >> $GITHUB_ENV
+          echo "JWT_EXPIRES_IN=1d" >> $GITHUB_ENV
+
+      - name: Start API in background
+        run: npm start &
+
+      - name: Wait for API to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:3000/health >/dev/null; then
+              echo "API is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API did not start in time"
+          exit 1
+
+      - name: Run Cypress tests
+        run: npx cypress run --spec "cypress/e2e/ct-001.cy.js"
